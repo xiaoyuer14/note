@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0,minimal-ui:ios">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 1、原型链继承
+        {
+            console.log('*******************1、原型链继承 begin******************');
+            
+            function superFn(name) {
+                this.name = name || "Amy";
+                this.colors = ["red", "white"];
+                // 不建议把方法放在构造函数中，不然每个实例都会生成一个方法，应该放在原型上复用
+            }
+            superFn.sayHello = function(){
+                console.log("Hello!");
+            }
+            superFn.prototype.sayHi = function() {
+                console.log(this.name);
+            }
+            function subFn() {
+            }
+            subFn.prototype = new superFn();
+            subFn.prototype.constructor = subFn;
+            let sub = new subFn();
+            sub.colors.push("black");
+            console.log(sub.name); 
+            // amy
+            sub.sayHi();
+            // amy
+            try{
+                subFn.sayHello();
+            }catch(e){
+                console.log(e);
+                // TypeError: subFn.sayHello is not a function
+            }
+            console.log(sub.colors);
+            // ["red", "white", "black"]
+            let sub1 = new subFn("Danny");
+            console.log(sub1.name); 
+            // amy
+            sub1.sayHi();
+            // amy
+            console.log(sub1.colors);
+            // ["red", "white", "black"]
+
+            console.info("原型链继承：");
+            console.info("1、继承了父类的原型方法和属性和构造函数的属性和方法；");
+            console.info("2、由于sub的引用类型属性修改行为，导致sub1的属性colors受到了污染；");
+            console.info("3、子类没法传参；");
+            console.info("4、子类未继承父类的静态方法；");
+            console.log('*******************1、原型链继承 end******************');
+        }
+        // 2、构造函数借用
+        {
+            console.log('*******************2、构造函数借用 begin******************');
+            function superFn(name) {
+                this.name = name || "Amy";
+                this.colors = ["red", "white"];
+            }
+            superFn.prototype.sayHi = function() {
+                console.log(this.name);
+            }
+            superFn.sayHello = function(){
+                console.log("Hello!");
+            }
+            function subFn() {
+                superFn.call(this,...arguments);
+            }
+            let sub = new subFn();
+            sub.colors.push("black");
+            console.log(sub.name); 
+            // amy
+            try{
+                sub.sayHi();
+            }catch(e){
+                console.log(e);
+                "sub.sayHi is not a function"
+            }
+            try{
+                subFn.sayHello();
+            }catch(e){
+                console.log(e);
+                // TypeError: subFn.sayHello is not a function
+            }
+            console.log(sub.colors);
+            // ["red", "white", "black"]
+            let sub1 = new subFn("Danny");
+            console.log(sub1.name); 
+            // Danny
+            try{
+                sub1.sayHi();
+            }catch(e){
+                console.log(e);
+                "sub1.sayHi is not a function"
+            }
+            console.log(sub1.colors);
+            // ["red", "white"]
+
+
+            console.info("构造函数借用：");
+            console.info("1、继承了父类构造函数的实例属性和方法；");
+            console.info("2、构造函数的引用类型属性继承后不会被污染；");
+            console.info("3、子类可以传参；");
+            console.info("4、父类原型上的方法没有继承");
+            console.info("5、父类静态方法没有继承");
+            console.log('*******************2、构造函数借用 end******************');
+        }
+        // 3、构造函数借用与原型链继承组合使用，也叫经典继承
+        {
+            console.log('*******************3、构造函数借用与原型链继承组合使用 begin******************');
+            function superFn(name) {
+                this.name = name || "Amy";
+                this.colors = ["red", "white"];
+            }
+            superFn.prototype.sayHi = function() {
+                console.log(this.name);
+            }
+            superFn.sayHello = function(){
+                console.log("Hello!");
+            }
+            function subFn() {
+                superFn.call(this,...arguments);
+            }
+            subFn.prototype = new superFn();
+            subFn.prototype.constructor = subFn;
+
+            let sub = new subFn();
+            sub.colors.push("black");
+            console.log(sub.name); 
+            // Amy
+            try{
+                sub.sayHi();
+            }catch(e){
+                console.log(e);
+                // "sub.sayHi is not a function"
+            }
+            try{
+                subFn.sayHello();
+            }catch(e){
+                console.log(e);
+                // TypeError: subFn.sayHello is not a function
+            }
+            console.log(sub.colors);
+            // ["red", "white", "black"]
+            let sub1 = new subFn("Danny");
+            console.log(sub1.name); 
+            // Danny
+            try{
+                sub1.sayHi();
+            }catch(e){
+                console.log(e);
+                "sub1.sayHi is not a function"
+            }
+            // amy
+            console.log(sub1.colors);
+            // ["red", "white"]
+
+            console.info("构造函数借用与原型链继承组合使用:");
+            console.info("1、继承了父类构造函数的属性和方法；");
+            console.info("2、继承了父类原型上的方法和属性");
+            console.info("3、无论任何情况，都需要调用两次超类的构造函数");
+            console.info("4、父类静态方法没有继承");
+            console.log('*******************3、构造函数借用与原型链继承组合使用 end******************');
+        }
+        // 4、寄生类继承
+        {
+            console.log('*******************4、寄生类继承 begin******************');
+
+            /* 
+                步骤：
+                1、子类构造函数的指针__proto__指向父类构造器，用于继承父类的静态方法；
+                2、子类构造函数的prototype的指针__proto__指向父构造器的prototype，继承父类原型的方法；
+                3、子类构造器里调用父类构造器，继承父类的属性；
+            */
+            Object.create = typeof Object.create === 'function' ? Object.create : function(proto) {
+                function F() {}
+                F.prototype = proto;
+                return new F();
+            }
+
+            function superFn(name) {
+                this.name = name || "Amy";
+                this.colors = ["red", "white"];
+            }
+            superFn.sayHello = function(){
+                console.log("Hello!");
+            }
+            superFn.prototype.sayHi = function() {
+                console.log(this.name);
+            }
+            function subFn(name) {
+                superFn.call(this, name);
+            }
+
+            function inheritFn(parent, child) {
+                child.prototype = Object.create(parent.prototype);
+                child.prototype.constructor = child;
+                child.__proto__ = parent;
+            }
+
+            inheritFn(superFn, subFn);
+
+            subFn.prototype.sayWhat = function() {
+                console.log("What!!!");
+            }
+
+            let sub = new subFn("lili");
+            sub.colors.push("black");
+            console.log(sub.name); 
+            // amy
+            sub.sayHi();
+            // amy
+            try{
+                // console.log(sub)
+                subFn.sayHello();
+            }catch(e){
+                console.log(e);
+                // TypeError: subFn.sayHello is not a function
+            }
+            try{
+                sub.sayWhat();
+            }catch(e){
+                console.log(e);
+            }
+            console.log(sub.colors);
+
+            let sub1 = new subFn("Danny");
+            console.log(sub1.name); 
+            // Danny
+            try{
+                sub1.sayHi();
+            }catch(e){
+                console.log(e);
+                "sub1.sayHi is not a function"
+            }
+            // amy
+            console.log(sub1.colors);
+            // ["red", "white"]
+
+            console.info("寄生类继承:");
+            console.info("1、通过Object.create获取父类的原型");
+            console.info("2、设置原型的构造函数为自己；");
+            console.info("3、设置指针__proto__指向父类；");
+            console.log('*******************4、寄生类继承 end******************');
+        }
+        // 5、自己实现一个new方法
+        {
+            function Person(name, age){
+                this.name = name;
+                this.sayHi = function() {
+                    console.log(this.name);
+                }
+                this.age = age;
+            }
+            Person.prototype.sayAge = function() {
+                console.log(this.age);   
+            }
+
+            let p = new Person("Lydia", 18);
+            console.log(p.name);
+            p.sayHi();
+            console.log(p.age);
+            p.sayAge();
+            
+            function _new(Fn,name,age) {
+                let obj = {};
+                let [fn,...args] = arguments;
+                obj.__proto__ = fn.prototype;
+                fn.call(obj,...args);
+                return obj;
+            }
+            
+            let p1 = _new(Person,"Lucy", 16);
+            console.log(p1.name);
+            p1.sayHi();
+            console.log(p1.age);
+            p1.sayAge();
+        }
+        {
+            /* function Parent(name) {
+                this.name = name
+            }
+            
+            Parent.sayHello = function (){
+                console.log('hello')
+            }
+            
+            Parent.prototype.sayName = function() {
+                console.log('my name is ' + this.name)
+                return this.name
+            }
+            
+            
+            function Child(name, age) {
+                Parent.call(this, name)
+                this.age = age
+            }
+            
+            function _inherits(Child, Parent) {
+                Child.prototype = Object.create(Parent.prototype)
+                Child.prototype.constructor = Child
+                Child.__proto__ = Parent
+            }
+            
+            _inherits(Child, Parent)
+            
+            Child.prototype.sayAge = function () {
+                console.log('my age is ' + this.age)
+                return this.age
+            }
+            
+            var parent = new Parent('Parent')
+            var child = new Child('Child', 18)
+            console.log(parent)
+            Parent.sayHello()
+            parent.sayName()
+            console.log(child)
+            Child.sayHello()
+            child.sayAge()
+            child.sayName() */
+        }
+    </script>
+</body>
+</html>

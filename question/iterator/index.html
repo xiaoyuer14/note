@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0,minimal-ui:ios">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+    <script>
+        {
+            var obj = {
+                x: 1,
+                y: 2,
+                z: 3
+            }
+            var obj1 = {
+                ab: 12312,
+                cc: "Assdasad",
+                asd: 123,
+                gd: "sadas"
+            }
+            function itFn() {
+                const that = this;
+                let keys = Object.keys(that);
+                let length = keys.length;
+                return {
+                    next: function() {
+                        if(this._count === length){
+                            return {
+                                value: null,
+                                done: true
+                            }
+                        }else{
+                            let key = keys[this._count++];
+                            return {
+                                value: that[key],
+                                done: false
+                            }
+                        }
+                    },
+                    _count: 0
+                }
+            }
+            function* iteratorFn() {
+                let keys = Object.keys(this);
+                let length = keys.length;
+                for(let i=0;i<length; i++) {
+                    let key = keys[i];
+                    yield this[key];
+                }
+            }
+            obj[Symbol.iterator] = iteratorFn;
+            console.log([...obj]);
+            obj1[Symbol.iterator] = itFn;
+            console.log([...obj1]);
+        }
+    </script>
+</body>
+</html>

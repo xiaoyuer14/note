@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0,minimal-ui:ios">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Clock</title>
+    <link rel="stylesheet" href="">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        html,body{
+            width: 100%;
+            height: 100px;
+            background-color: eee;
+        }
+        #clock {
+            background-color: #ddd;
+            position: absolute;
+            top:50%;
+            left: 50%;
+            transform: translate3d(-50%, -50%, 0);
+        }
+    </style>
+</head>
+<body>
+    <div class="canvas">
+        <canvas id="clock" width="300" height="300"></canvas>
+    </div>
+    <script>
+        window.onload = function(e) {
+            let ev = e || window.event;
+            const SCALE = 1.2;
+
+            let canvas = document.querySelector("#clock");
+            let width = canvas.width;
+            let height = canvas.height;
+            canvas.setAttribute("width", String(width*SCALE));
+            canvas.setAttribute("height", String(height*SCALE));
+
+            if(canvas.getContext) {
+                let ctx = canvas.getContext("2d");
+
+                setInterval(function(){
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                    clockMove();
+                },1000);
+                
+                function clockMove() {
+                    // console.log(ctx);
+                    // 必须先save，不然clearRect只会清楚移动后的新原点画布
+                    ctx.save();
+                    ctx.translate(150*SCALE, 150*SCALE);
+
+                    // 表盘
+                    ctx.save();
+                    ctx.strokeStyle = "gray";
+                    ctx.lineWidth = 8;
+                    ctx.beginPath();
+                    ctx.arc(0,0,120*SCALE,0,360*Math.PI/180);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // 时点
+                    for(let i=0;i<12;i++) {
+                        ctx.save();
+                        ctx.strokeStyle = "black";
+                        ctx.lineWidth = 8*SCALE;
+                        ctx.lineCap = "round";
+                        ctx.beginPath();
+                        ctx.rotate(i*30*Math.PI/180);
+                        ctx.moveTo(0, -105*SCALE);
+                        ctx.lineTo(0,-90*SCALE);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+
+                    // 时点数字
+                    let clockNum = 12;
+                    for(let i=0;i<12;i++) {
+                        ctx.save();
+                        let fontStr = [14*SCALE, "px sans-serif"].join("");
+                        ctx.beginPath();
+                        if(i!==0) {
+                            clockNum = i;
+                        }
+                        let angle = (i+3)*30;
+                        // console.log('angle:',angle);
+                        // 假设圆心:o (x0,y0)
+                        // 半径:r
+                        // 角度:angle (角度是相对于图中红点位置而言，逆时针为负数，顺时针为正)
+                        // 计算公式： 
+                        // p2 (x1,y1), 其中angle = 30
+                        // x1 = x0 + r * cos(angle * PI / 180)
+                        // y1 = y0 + r * sin(angle * PI /180)
+                        let x1 = 75*SCALE * Math.cos(angle * Math.PI / 180);
+                        // let y1 = -6*SCALE + 75*SCALE * Math.sin(angle * Math.PI /180);
+                        let y1 = 75*SCALE * Math.sin(angle * Math.PI /180);
+                        
+                        ctx.font = fontStr;
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "middle";
+                        ctx.fillText(clockNum, -x1, -y1);
+                        ctx.restore();
+                    }
+
+                    // 分点
+                    for(let i=0;i<60;i++) {
+                        ctx.save();
+                        ctx.rotate(i*6*Math.PI/180);
+                        if(i%5 != 0){
+                            ctx.strokeStyle = "black";
+                            ctx.lineWidth = 4*SCALE;
+                            ctx.lineCap = "round";
+                            ctx.beginPath();
+                            ctx.moveTo(0, -105*SCALE);
+                            ctx.lineTo(0,-100*SCALE);
+                            ctx.stroke();
+                        }
+                        ctx.restore();
+                    }
+
+                    // 时间
+                    let now = new Date();
+                    let s = now.getSeconds();
+                    let m = now.getMinutes() + s/60;
+                    let h = now.getHours() + m/60;
+
+                    h = h >12 ? h-12 : h;
+
+                    // 时针
+                    ctx.save();
+                    ctx.rotate(h*30*Math.PI/180);
+                    ctx.strokeStyle = "black";
+                    ctx.lineWidth = 8*SCALE;
+                    ctx.lineCap = "round";
+                    ctx.beginPath();
+                    ctx.moveTo(0, 20*SCALE);
+                    ctx.lineTo(0,-50*SCALE);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // 分针
+                    ctx.save();
+                    ctx.rotate(m*6*Math.PI/180);
+                    ctx.strokeStyle = "black";
+                    ctx.lineWidth = 4*SCALE;
+                    ctx.lineCap = "round";
+                    ctx.beginPath();
+                    ctx.moveTo(0, 20*SCALE);
+                    ctx.lineTo(0,-80*SCALE);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // 底座
+                    ctx.save();
+                    ctx.fillStyle = "red";
+                    ctx.beginPath();
+                    ctx.arc(0,0,8*SCALE,0,360*Math.PI/180);
+                    ctx.fill();
+                    ctx.restore();
+
+                    // 秒钟
+                    ctx.save();
+                    ctx.rotate(s*6*Math.PI/180);
+                    ctx.strokeStyle = "red";
+                    ctx.lineWidth = 4*SCALE;
+                    ctx.lineCap = "round";
+                    ctx.beginPath();
+                    ctx.moveTo(0, 20*SCALE);
+                    ctx.lineTo(0,-79*SCALE);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // 秒钟指针
+                    ctx.save();
+                    ctx.rotate(s*6*Math.PI/180);
+                    ctx.strokeStyle = "red";
+                    ctx.lineWidth = 3*SCALE;
+                    ctx.beginPath();
+                    ctx.arc(0,-87*SCALE,7*SCALE,0,360*Math.PI/180);
+                    ctx.stroke();
+                    ctx.restore();
+                    // 对应第一个save
+                    ctx.restore();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

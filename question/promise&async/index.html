@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0,minimal-ui:ios">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+
+    <script>
+        {
+            let count = () => {
+                console.log("2");
+                return new Promise((resolve, reject) => {
+                    console.log("3");
+                    setTimeout(() => {
+                        console.log("4");
+                        resolve('promise故意抛出异常')
+                    }, 1000);
+                })
+            }
+            let list = () => {
+                console.log("6");
+                return new Promise((resolve, reject) => {
+                    console.log("7");
+                    setTimeout(() => {
+                        console.log("8");
+                        resolve([1, 2, 3])
+                    }, 1000);
+                })
+            }
+
+            let getList = async () => {
+                console.log("1");
+                let c = count()
+                console.log("5");
+                console.log('async')    //此段代码并没有执行 2
+                let l = list()
+                console.log("9");
+                return { count: c, list: l }
+            }
+            console.time('start');
+            getList().then(res => {
+                console.log("10");
+                console.log(res)
+            })
+            .catch(err => {
+                console.timeEnd('start')
+                console.log(err)
+            })
+        }
+            function F() {
+                getName = function() {console.log(1)};
+                return this;
+            }
+            F.getName = function() {console.log(2)};
+            F.prototype.getName = function() {console.log(3)};
+            var getName = function() {console.log(4)};
+            function getName () {console.log(5)};
+
+            F.getName();
+            getName();
+            F().getName();
+            getName();
+            new F.getName();
+            new F().getName();
+            new new F().getName();
+
+            /* 
+                解析
+                初始化后，变量和函数提升
+                function F() {
+                    getName = function() {console.log(1)};
+                    return this;
+                }
+                var getName;
+                //function getName () {console.log(5)}; //最后被4覆盖
+                F.getName = function() {console.log(2)};
+                F.prototype.getName = function() {console.log(3)};
+                getName = function() {console.log(4)};
+                
+
+                F.getName();            //2
+                getName();              //4
+                F().getName();          //执行F，getName被替换，返回this为window，1
+                                        // getName = function() {console.log(1)};
+                getName();              //1
+                new F.getName();        //F.getName先执行,2
+                new F().getName();      //new F()先,返回F的实例f，执行原型方法，3
+                new new F().getName();  //同上3
+
+            */
+    </script>
+</body>
+</html>

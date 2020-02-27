@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>mvvm</title>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but templateforsystem doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app">
+        <input type="text" v-model="school.name">{{title}}
+        <input type="text" v-model="title">
+        <div>  {{school.name}} -- {{title}} </div>
+        <div>  - {{school.age}}</div>
+        <ul>
+            <li>{{getNewName}}</li>
+            <li>2</li>
+        </ul>
+        <div v-html="message"></div>
+        <button v-on:click="change">改变</button>
+    </div>
+    <script src="watcher.js"></script>
+    <script src="./observer.js"></script>
+    <script src="./compiler.js"></script>
+    <script src="vue.js"></script>
+    <script>
+        let vm= new Vue({
+            el: "#app",
+            data: {
+                title: "hello everyone",
+                school: {
+                    name: 'danny',
+                    age: 39
+                },
+                message: "<h1>真是太厉害了！</h1>"
+            },
+            computed: {
+                getNewName() {
+                    return this.school.name + "相当结棍！";
+                }
+            },
+            methods: {
+                change(e) {
+                    this.school.name = "danny真的很厉害！";
+                }
+            }
+        })
+        // 匹配网址
+        // var str = "https://www.baidu.com/play/?id=123&name=456#detail"
+        // var reg = /^(?:(http|https|ftp):\/\/)?((?:[\w-]+\.)+[a-z0-9]+)((?:\/[^/?#]*)+)?(\?[^#]+)?(#.+)?$/i
+        // console.log(reg.exec(str));
+        // 匹配6-16位包含数字大小写字母
+        // var reg = /(?!^[a-zA-Z]+$)(?!^[a-z0-9]+$)(?!^[A-Z0-9]+$)^[a-zA-Z0-9]{6,16}$/;
+        // var str = "111aaa";
+        // reg.test(str);
+        // 1-10位数字字母，必须包含下划线
+        // var reg = /(?!^[a-zA-Z0-9]+$)^[\w]{1,10}$/;
+        // function Dog(name) {
+        //     this.name = name;
+        // }
+        // Dog.prototype.say = function() {
+        //     console.log("my name is " + this.name);
+        // }
+        // Dog.prototype.yard = function() {
+        //     console.log("wang wang");
+        // }
+        // var sanmao = new Dog("三毛");
+        // sanmao.say();
+        // sanmao.yard();
+        // console.log(sanmao instanceof Dog);
+        // function _new(fn, ...arg) {
+        //     var obj = {};
+        //     obj.__proto__ = fn.prototype;
+        //     fn.call(obj,...arg);
+        //     return obj;
+        // }
+
+        // function currying(fn, length) {
+        //     length = length || fn.length;
+        //     return function(...args) {
+        //         if(args.length === length) {
+        //             return fn(...args);
+        //         }
+        //         return currying(fn.bind(null, ...args), length - args.length);
+        //     }
+        // }
+        // function $add(...args) {
+        //     return args.reduce((current, next) => current + next , 0);
+        // }
+        // var add = currying($add, 4);
+        // add(1,2,3)(4);
+    </script>
+  </body>
+</html>
